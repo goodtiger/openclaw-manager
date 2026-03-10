@@ -154,26 +154,44 @@ fn get_unix_node_paths() -> Vec<String> {
     // 系统安装
     paths.push("/usr/bin/node".to_string());
     
-    // nvm (检查常见版本)
     if let Some(home) = dirs::home_dir() {
         let home_str = home.display().to_string();
         
-        // nvm 默认版本
-        paths.push(format!("{}/.nvm/versions/node/v22.0.0/bin/node", home_str));
-        paths.push(format!("{}/.nvm/versions/node/v22.1.0/bin/node", home_str));
-        paths.push(format!("{}/.nvm/versions/node/v22.2.0/bin/node", home_str));
-        paths.push(format!("{}/.nvm/versions/node/v22.11.0/bin/node", home_str));
-        paths.push(format!("{}/.nvm/versions/node/v22.12.0/bin/node", home_str));
-        paths.push(format!("{}/.nvm/versions/node/v23.0.0/bin/node", home_str));
-        
-        // 尝试 nvm alias default（读取 nvm 的 default alias）
+        // nvm alias default
         let nvm_default = format!("{}/.nvm/alias/default", home_str);
         if let Ok(version) = std::fs::read_to_string(&nvm_default) {
             let version = version.trim();
             if !version.is_empty() {
-                paths.insert(0, format!("{}/.nvm/versions/node/v{}/bin/node", home_str, version));
+                let normalized = if version.starts_with('v') {
+                    version.to_string()
+                } else {
+                    format!("v{}", version)
+                };
+                paths.push(format!("{}/.nvm/versions/node/{}/bin/node", home_str, normalized));
             }
         }
+
+        // 动态扫描 nvm 已安装版本，避免写死少量版本导致误判
+        let nvm_versions_dir = std::path::Path::new(&home).join(".nvm/versions/node");
+        if let Ok(entries) = std::fs::read_dir(&nvm_versions_dir) {
+            let mut version_paths = Vec::new();
+            for entry in entries.flatten() {
+                let node_path = entry.path().join("bin/node");
+                if node_path.exists() {
+                    version_paths.push(node_path.display().to_string());
+                }
+            }
+            version_paths.sort();
+            version_paths.reverse();
+            paths.extend(version_paths);
+        }
+        
+        // 常见回退版本
+        paths.push(format!("{}/.nvm/versions/node/v22.22.0/bin/node", home_str));
+        paths.push(format!("{}/.nvm/versions/node/v22.12.0/bin/node", home_str));
+        paths.push(format!("{}/.nvm/versions/node/v22.11.0/bin/node", home_str));
+        paths.push(format!("{}/.nvm/versions/node/v22.0.0/bin/node", home_str));
+        paths.push(format!("{}/.nvm/versions/node/v23.0.0/bin/node", home_str));
         
         // fnm
         paths.push(format!("{}/.fnm/aliases/default/bin/node", home_str));
