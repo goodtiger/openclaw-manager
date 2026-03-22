@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { 
-  Trash2, 
-  RefreshCw, 
+import {
+  Trash2,
+  RefreshCw,
   Download,
   Filter,
   Terminal,
@@ -39,6 +40,7 @@ const MODULE_COLORS: Record<string, string> = {
 };
 
 export function Logs() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filter, setFilter] = useState<FilterLevel>('all');
   const [moduleFilter, setModuleFilter] = useState<string>('all');
@@ -50,7 +52,7 @@ export function Logs() {
     const updateLogs = () => {
       setLogs(logStore.getAll());
     };
-    
+
     updateLogs(); // 初始加载
     return logStore.subscribe(updateLogs);
   }, []);
@@ -120,7 +122,7 @@ export function Logs() {
         return String(arg);
       }).join(' ');
     } catch {
-      return '[无法序列化]';
+      return t('logs.cannotSerialize');
     }
   };
 
@@ -136,7 +138,7 @@ export function Logs() {
             onChange={(e) => setFilter(e.target.value as FilterLevel)}
             className="bg-surface-card border border-edge rounded-lg px-3 py-1.5 text-sm text-content-secondary"
           >
-            <option value="all">所有级别</option>
+            <option value="all">{t('logs.allLevels')}</option>
             <option value="debug">Debug</option>
             <option value="info">Info</option>
             <option value="warn">Warn</option>
@@ -150,7 +152,7 @@ export function Logs() {
           onChange={(e) => setModuleFilter(e.target.value)}
           className="bg-surface-card border border-edge rounded-lg px-3 py-1.5 text-sm text-content-secondary"
         >
-          <option value="all">所有模块</option>
+          <option value="all">{t('logs.allModules')}</option>
           {modules.map(module => (
             <option key={module} value={module}>{module}</option>
           ))}
@@ -174,7 +176,7 @@ export function Logs() {
               onChange={(e) => setAutoScroll(e.target.checked)}
               className="w-3 h-3 rounded"
             />
-            自动滚动
+            {t('logs.autoScroll')}
           </label>
           <button
             onClick={handleExport}
@@ -214,7 +216,7 @@ export function Logs() {
             <div className="h-full flex items-center justify-center text-content-tertiary">
               <div className="text-center">
                 <Terminal size={32} className="mx-auto mb-2 opacity-50" />
-                <p>暂无日志</p>
+                <p>{t('logs.noLogs')}</p>
               </div>
             </div>
           ) : (

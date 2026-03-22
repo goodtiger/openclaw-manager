@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import { StatusCard } from './StatusCard';
 import { QuickActions } from './QuickActions';
 import { SystemInfo } from './SystemInfo';
@@ -16,6 +17,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<ServiceStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -53,10 +55,10 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
     fetchStatus();
     fetchLogs();
     if (!isTauri()) return;
-    
+
     const statusInterval = setInterval(fetchStatus, 3000);
     const logsInterval = autoRefreshLogs ? setInterval(fetchLogs, 2000) : null;
-    
+
     return () => {
       clearInterval(statusInterval);
       if (logsInterval) clearInterval(logsInterval);
@@ -140,7 +142,6 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
     show: { opacity: 1, y: 0 },
   };
 
-  // 检查环境是否就绪
   const needsSetup = envStatus && !envStatus.ready;
 
   return (
@@ -151,19 +152,16 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
         animate="show"
         className="space-y-6"
       >
-        {/* 环境安装向导（仅在需要时显示） */}
         {needsSetup && (
           <motion.div variants={itemVariants}>
             <Setup onComplete={onSetupComplete} embedded />
           </motion.div>
         )}
 
-        {/* 服务状态卡片 */}
         <motion.div variants={itemVariants}>
           <StatusCard status={status} loading={loading} />
         </motion.div>
 
-        {/* 快捷操作 */}
         <motion.div variants={itemVariants}>
           <QuickActions
             status={status}
@@ -174,7 +172,6 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
           />
         </motion.div>
 
-        {/* 实时日志 */}
         <motion.div variants={itemVariants}>
           <div className="bg-surface-card rounded-2xl border border-edge overflow-hidden">
             {/* 日志标题栏 */}
@@ -202,7 +199,7 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
                         onChange={(e) => setAutoRefreshLogs(e.target.checked)}
                         className="w-3 h-3 rounded border-edge bg-surface-elevated text-claw-500"
                       />
-                      自动刷新
+                      {t('dashboard.autoRefresh')}
                     </label>
                     <button
                       onClick={(e) => {
@@ -224,7 +221,6 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
               </div>
             </div>
 
-            {/* 日志内容 */}
             {logsExpanded && (
               <div ref={logsContainerRef} className="h-64 overflow-y-auto p-4 font-mono text-xs leading-relaxed bg-surface-sidebar">
                 {logs.length === 0 ? (
@@ -249,7 +245,6 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
           </div>
         </motion.div>
 
-        {/* 系统信息 */}
         <motion.div variants={itemVariants}>
           <SystemInfo />
         </motion.div>

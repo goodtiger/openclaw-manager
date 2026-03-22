@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Shield,
@@ -10,6 +11,7 @@ import {
   Trash2,
   AlertTriangle,
   X,
+  Globe,
 } from 'lucide-react';
 
 interface InstallResult {
@@ -23,6 +25,12 @@ interface SettingsProps {
 }
 
 export function Settings({ onEnvironmentChange }: SettingsProps) {
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   const [identity, setIdentity] = useState({
     botName: 'Clawd',
     userName: '主人',
@@ -38,7 +46,7 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
     try {
       // TODO: 保存身份配置
       await new Promise((resolve) => setTimeout(resolve, 500));
-      alert('设置已保存！');
+      alert(t('settings.settingsSaved'));
     } catch (e) {
       console.error('保存失败:', e);
     } finally {
@@ -74,7 +82,7 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
     } catch (e) {
       setUninstallResult({
         success: false,
-        message: '卸载过程中发生错误',
+        message: t('settings.uninstallError'),
         error: String(e),
       });
     } finally {
@@ -85,6 +93,30 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
   return (
     <div className="h-full overflow-y-auto scroll-container pr-2">
       <div className="max-w-2xl space-y-6">
+        {/* Language Settings */}
+        <div className="bg-dark-700 rounded-2xl p-6 border border-dark-500">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+              <Globe size={20} className="text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">{t('settings.language')}</h3>
+              <p className="text-xs text-gray-500">{t('settings.languageDesc')}</p>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">{t('settings.displayLanguage')}</label>
+            <select
+              value={i18n.language?.startsWith('zh') ? 'zh' : 'en'}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="input-base"
+            >
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
         {/* 身份配置 */}
         <div className="bg-surface-card rounded-2xl p-6 border border-edge">
           <div className="flex items-center gap-3 mb-6">
@@ -123,7 +155,7 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
                 onChange={(e) =>
                   setIdentity({ ...identity, userName: e.target.value })
                 }
-                placeholder="主人"
+                placeholder={t('settings.yourNamePlaceholder')}
                 className="input-base"
               />
             </div>
@@ -137,16 +169,16 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
                 }
                 className="input-base"
               >
-                <option value="Asia/Shanghai">Asia/Shanghai (北京时间)</option>
-                <option value="Asia/Hong_Kong">Asia/Hong_Kong (香港时间)</option>
-                <option value="Asia/Tokyo">Asia/Tokyo (东京时间)</option>
+                <option value="Asia/Shanghai">Asia/Shanghai ({t('settings.tz_shanghai')})</option>
+                <option value="Asia/Hong_Kong">Asia/Hong_Kong ({t('settings.tz_hongkong')})</option>
+                <option value="Asia/Tokyo">Asia/Tokyo ({t('settings.tz_tokyo')})</option>
                 <option value="America/New_York">
-                  America/New_York (纽约时间)
+                  America/New_York ({t('settings.tz_newyork')})
                 </option>
                 <option value="America/Los_Angeles">
-                  America/Los_Angeles (洛杉矶时间)
+                  America/Los_Angeles ({t('settings.tz_losangeles')})
                 </option>
-                <option value="Europe/London">Europe/London (伦敦时间)</option>
+                <option value="Europe/London">Europe/London ({t('settings.tz_london')})</option>
                 <option value="UTC">UTC</option>
               </select>
             </div>
@@ -235,8 +267,8 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
             >
               <Trash2 size={18} className="text-red-400" />
               <div className="flex-1">
-                <p className="text-sm text-red-300">卸载 OpenClaw</p>
-                <p className="text-xs text-red-400/70">从系统中移除 OpenClaw CLI 工具</p>
+                <p className="text-sm text-red-300">{t('settings.uninstall')}</p>
+                <p className="text-xs text-red-400/70">{t('settings.uninstallDesc')}</p>
               </div>
             </button>
           </div>
@@ -272,15 +304,15 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
                   <ul className="text-sm text-content-secondary mb-6 space-y-2">
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
-                      停止正在运行的服务
+                      {t('settings.uninstallAction1')}
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
-                      移除 OpenClaw CLI 工具
+                      {t('settings.uninstallAction2')}
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
-                      配置文件将被保留在 ~/.openclaw
+                      {t('settings.uninstallAction3')}
                     </li>
                   </ul>
 
@@ -289,7 +321,7 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
                       onClick={() => setShowUninstallConfirm(false)}
                       className="flex-1 px-4 py-2.5 bg-surface-elevated hover:bg-surface-elevated text-content-primary rounded-lg transition-colors"
                     >
-                      取消
+                      {t('settings.cancel')}
                     </button>
                     <button
                       onClick={handleUninstall}
@@ -299,12 +331,12 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
                       {uninstalling ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
-                          卸载中...
+                          {t('settings.uninstalling')}
                         </>
                       ) : (
                         <>
                           <Trash2 size={16} />
-                          确认卸载
+                          {t('settings.confirmUninstallBtn')}
                         </>
                       )}
                     </button>
@@ -343,7 +375,7 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
             ) : (
               <Save size={16} />
             )}
-            保存设置
+            {t('settings.saveSettings')}
           </button>
         </div>
       </div>

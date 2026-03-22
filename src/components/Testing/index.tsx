@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
 import {
@@ -19,6 +20,7 @@ interface DiagnosticResult {
 }
 
 export function Testing() {
+  const { t } = useTranslation();
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -36,10 +38,10 @@ export function Testing() {
     } catch (e) {
       testingLogger.error('诊断执行失败', e);
       setDiagnosticResults([{
-        name: '诊断执行',
+        name: t('testing.diagnosticExecution'),
         passed: false,
         message: String(e),
-        suggestion: '请检查 OpenClaw 是否正确安装',
+        suggestion: t('testing.checkInstallation'),
       }]);
     } finally {
       setLoading(false);
@@ -77,7 +79,7 @@ export function Testing() {
               ) : (
                 <Play size={16} />
               )}
-              运行诊断
+              {t('testing.runDiagnostics')}
             </button>
           </div>
 
@@ -86,12 +88,12 @@ export function Testing() {
             <div className="flex gap-4 mb-4 p-3 bg-surface-elevated rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle size={16} className="text-green-400" />
-                <span className="text-sm text-green-400">{passedCount} 项通过</span>
+                <span className="text-sm text-green-400">{t('testing.passed', { count: passedCount })}</span>
               </div>
               {failedCount > 0 && (
                 <div className="flex items-center gap-2">
                   <XCircle size={16} className="text-red-400" />
-                  <span className="text-sm text-red-400">{failedCount} 项失败</span>
+                  <span className="text-sm text-red-400">{t('testing.failed', { count: failedCount })}</span>
                 </div>
               )}
             </div>
@@ -142,7 +144,7 @@ export function Testing() {
           {diagnosticResults.length === 0 && !loading && (
             <div className="text-center py-8 text-content-tertiary">
               <Stethoscope size={48} className="mx-auto mb-3 opacity-30" />
-              <p>点击"运行诊断"按钮开始检查系统状态</p>
+              <p>{t('testing.emptyState')}</p>
             </div>
           )}
         </div>

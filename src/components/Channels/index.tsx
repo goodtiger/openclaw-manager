@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
 import {
@@ -97,7 +98,7 @@ const channelInfo: Record<
     icon: <Hash size={20} />,
     color: 'text-indigo-400',
     fields: [
-      { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: 'Discord Bot Token', required: true },
+      { key: 'token', label: 'Bot Token', type: 'password', placeholder: 'Discord Bot Token', required: true },
       { key: 'testChannelId', label: '测试 Channel ID', type: 'text', placeholder: '用于发送测试消息的频道 ID (可选)' },
       {
         key: 'dmPolicy', label: '私聊策略', type: 'select', options: [
@@ -240,6 +241,145 @@ interface TestResult {
 }
 
 export function Channels() {
+  const { t } = useTranslation();
+
+  const channelInfo: Record<
+    string,
+    {
+      name: string;
+      icon: React.ReactNode;
+      color: string;
+      fields: ChannelField[];
+      helpText?: string;
+    }
+  > = {
+    telegram: {
+      name: 'Telegram',
+      icon: <MessageCircle size={20} />,
+      color: 'text-blue-400',
+      fields: [
+        { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: t('channels.telegram.botTokenPlaceholder'), required: true },
+        { key: 'userId', label: 'User ID', type: 'text', placeholder: t('channels.telegram.userIdPlaceholder'), required: true },
+        { key: 'dmPolicy', label: t('channels.telegram.dmPolicy'), type: 'select', options: [
+          { value: 'pairing', label: t('channels.policyPairing') },
+          { value: 'open', label: t('channels.policyOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+        { key: 'groupPolicy', label: t('channels.telegram.groupPolicy'), type: 'select', options: [
+          { value: 'allowlist', label: t('channels.groupAllowlist') },
+          { value: 'open', label: t('channels.groupOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+      ],
+      helpText: t('channels.telegram.helpText'),
+    },
+    discord: {
+      name: 'Discord',
+      icon: <Hash size={20} />,
+      color: 'text-indigo-400',
+      fields: [
+        { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: 'Discord Bot Token', required: true },
+        { key: 'testChannelId', label: t('channels.discord.testChannelId'), type: 'text', placeholder: t('channels.discord.testChannelIdPlaceholder') },
+        { key: 'dmPolicy', label: t('channels.discord.dmPolicy'), type: 'select', options: [
+          { value: 'pairing', label: t('channels.policyPairing') },
+          { value: 'open', label: t('channels.policyOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+      ],
+      helpText: t('channels.discord.helpText'),
+    },
+    slack: {
+      name: 'Slack',
+      icon: <Slack size={20} />,
+      color: 'text-purple-400',
+      fields: [
+        { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: 'xoxb-...', required: true },
+        { key: 'appToken', label: 'App Token', type: 'password', placeholder: 'xapp-...' },
+        { key: 'testChannelId', label: t('channels.slack.testChannelId'), type: 'text', placeholder: t('channels.slack.testChannelIdPlaceholder') },
+      ],
+      helpText: t('channels.slack.helpText'),
+    },
+    feishu: {
+      name: t('channels.feishu.name'),
+      icon: <MessagesSquare size={20} />,
+      color: 'text-blue-500',
+      fields: [
+        { key: 'appId', label: 'App ID', type: 'text', placeholder: t('channels.feishu.appIdPlaceholder'), required: true },
+        { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: t('channels.feishu.appSecretPlaceholder'), required: true },
+        { key: 'testChatId', label: t('channels.feishu.testChatId'), type: 'text', placeholder: t('channels.feishu.testChatIdPlaceholder') },
+        { key: 'connectionMode', label: t('channels.feishu.connectionMode'), type: 'select', options: [
+          { value: 'websocket', label: t('channels.feishu.websocket') },
+          { value: 'webhook', label: t('channels.feishu.webhook') },
+        ]},
+        { key: 'domain', label: t('channels.feishu.domain'), type: 'select', options: [
+          { value: 'feishu', label: t('channels.feishu.domestic') },
+          { value: 'lark', label: t('channels.feishu.overseas') },
+        ]},
+        { key: 'requireMention', label: t('channels.feishu.requireMention'), type: 'select', options: [
+          { value: 'true', label: t('channels.feishu.yes') },
+          { value: 'false', label: t('channels.feishu.no') },
+        ]},
+      ],
+      helpText: t('channels.feishu.helpText'),
+    },
+    imessage: {
+      name: 'iMessage',
+      icon: <Apple size={20} />,
+      color: 'text-green-400',
+      fields: [
+        { key: 'dmPolicy', label: t('channels.imessage.dmPolicy'), type: 'select', options: [
+          { value: 'pairing', label: t('channels.policyPairing') },
+          { value: 'open', label: t('channels.policyOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+        { key: 'groupPolicy', label: t('channels.imessage.groupPolicy'), type: 'select', options: [
+          { value: 'allowlist', label: t('channels.groupAllowlist') },
+          { value: 'open', label: t('channels.groupOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+      ],
+      helpText: t('channels.imessage.helpText'),
+    },
+    whatsapp: {
+      name: 'WhatsApp',
+      icon: <MessageCircle size={20} />,
+      color: 'text-green-500',
+      fields: [
+        { key: 'dmPolicy', label: t('channels.whatsapp.dmPolicy'), type: 'select', options: [
+          { value: 'pairing', label: t('channels.policyPairing') },
+          { value: 'open', label: t('channels.policyOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+        { key: 'groupPolicy', label: t('channels.whatsapp.groupPolicy'), type: 'select', options: [
+          { value: 'allowlist', label: t('channels.groupAllowlist') },
+          { value: 'open', label: t('channels.groupOpen') },
+          { value: 'disabled', label: t('channels.policyDisabled') },
+        ]},
+      ],
+      helpText: t('channels.whatsapp.helpText'),
+    },
+    wechat: {
+      name: t('channels.wechat.name'),
+      icon: <MessageSquare size={20} />,
+      color: 'text-green-600',
+      fields: [
+        { key: 'appId', label: 'App ID', type: 'text', placeholder: t('channels.wechat.appIdPlaceholder') },
+        { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: t('channels.wechat.appSecretPlaceholder') },
+      ],
+      helpText: t('channels.wechat.helpText'),
+    },
+    dingtalk: {
+      name: t('channels.dingtalk.name'),
+      icon: <Bell size={20} />,
+      color: 'text-blue-600',
+      fields: [
+        { key: 'appKey', label: 'App Key', type: 'text', placeholder: t('channels.dingtalk.appKeyPlaceholder') },
+        { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: t('channels.dingtalk.appSecretPlaceholder') },
+      ],
+      helpText: t('channels.dingtalk.helpText'),
+    },
+  };
+
   const [channels, setChannels] = useState<ChannelConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
@@ -299,7 +439,7 @@ export function Channels() {
       // 刷新插件状态
       await checkFeishuPlugin();
     } catch (e) {
-      alert('安装失败: ' + e);
+      alert(t('setup.installFailed', { error: e }));
     } finally {
       setFeishuPluginInstalling(false);
     }
@@ -357,13 +497,13 @@ export function Channels() {
       await fetchChannels();
       setTestResult({
         success: true,
-        message: `${channelName} 配置已清空`,
+        message: t('channels.configCleared', { name: channelName }),
         error: null,
       });
     } catch (e) {
       setTestResult({
         success: false,
-        message: '清空失败',
+        message: t('channels.clearFailed'),
         error: String(e),
       });
     } finally {
@@ -394,7 +534,7 @@ export function Channels() {
     } catch (e) {
       setTestResult({
         success: false,
-        message: '测试失败',
+        message: t('channels.testFailed'),
         error: String(e),
       });
     } finally {
@@ -424,7 +564,7 @@ export function Channels() {
             await fetchChannels();
             setTestResult({
               success: true,
-              message: 'WhatsApp 登录成功！',
+              message: t('channels.whatsapp.loginSuccess'),
               error: null,
             });
           }
@@ -441,7 +581,7 @@ export function Channels() {
 
       alert('请在弹出的终端窗口中扫描二维码完成登录\n\n登录成功后界面会自动更新');
     } catch (e) {
-      alert('启动登录失败: ' + e);
+      alert(t('channels.whatsapp.loginFailed') + e);
       setLoginLoading(false);
     }
   };
@@ -539,7 +679,7 @@ export function Channels() {
       alert('渠道配置已保存！');
     } catch (e) {
       console.error('保存失败:', e);
-      alert('保存失败: ' + e);
+      alert(t('channels.saveFailed', { error: e }));
     } finally {
       setSaving(false);
     }
@@ -622,7 +762,7 @@ export function Channels() {
                       {isConfigured ? (
                         <>
                           <Check size={12} className="text-green-400" />
-                          <span className="text-xs text-green-400">已配置</span>
+                          <span className="text-xs text-green-400">{t('channels.configured')}</span>
                         </>
                       ) : (
                         <>
@@ -704,14 +844,14 @@ export function Channels() {
                                 ) : (
                                   <Download size={14} />
                                 )}
-                                {feishuPluginInstalling ? '安装中...' : '一键安装插件'}
+                                {feishuPluginInstalling ? t('channels.feishu.installing') : t('channels.feishu.installPlugin')}
                               </button>
                               <button
                                 onClick={checkFeishuPlugin}
                                 disabled={feishuPluginLoading}
                                 className="btn-secondary flex items-center gap-2 text-sm py-2"
                               >
-                                刷新状态
+                                {t('channels.feishu.refreshStatus')}
                               </button>
                             </div>
                             <p className="text-xs text-content-tertiary mt-2">
@@ -803,7 +943,7 @@ export function Channels() {
                           }
                           className="input-base"
                         >
-                          <option value="">请选择...</option>
+                          <option value="">{t('channels.pleaseSelect')}</option>
                           {field.options?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {opt.label}
@@ -869,7 +1009,7 @@ export function Channels() {
                           ) : (
                             <QrCode size={16} />
                           )}
-                          {loginLoading ? '等待登录...' : '启动扫码登录'}
+                          {loginLoading ? t('channels.whatsapp.waitingLogin') : t('channels.whatsapp.startLogin')}
                         </button>
                         <button
                           onClick={async () => {
@@ -878,7 +1018,7 @@ export function Channels() {
                           }}
                           disabled={testing}
                           className="btn-secondary flex items-center justify-center gap-2 px-4"
-                          title="刷新状态"
+                          title={t('channels.feishu.refreshStatus')}
                         >
                           {testing ? (
                             <Loader2 size={16} className="animate-spin" />
@@ -996,7 +1136,7 @@ export function Channels() {
                           'font-medium',
                           testResult.success ? 'text-green-400' : 'text-red-400'
                         )}>
-                          {testResult.success ? '测试成功' : '测试失败'}
+                          {testResult.success ? t('channels.testSuccess') : t('channels.testFailed')}
                         </p>
                         <p className="text-sm text-content-secondary mt-1">{testResult.message}</p>
                         {testResult.error && (

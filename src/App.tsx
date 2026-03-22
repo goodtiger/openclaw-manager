@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { Dashboard } from './components/Dashboard';
@@ -50,6 +51,7 @@ interface UpdateResult {
 }
 
 function App() {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
   const [isReady, setIsReady] = useState<boolean | null>(null);
   const [envStatus, setEnvStatus] = useState<EnvironmentStatus | null>(null);
@@ -74,7 +76,7 @@ function App() {
       const status = await invoke<EnvironmentStatus>('check_environment');
       appLogger.info('环境检查完成', status);
       setEnvStatus(status);
-      setIsReady(true); // 总是显示主界面
+      setIsReady(true);
     } catch (e) {
       appLogger.error('环境检查失败', e);
       setIsReady(true);
@@ -106,9 +108,7 @@ function App() {
       const result = await invoke<UpdateResult>('update_openclaw');
       setUpdateResult(result);
       if (result.success) {
-        // 更新成功后重新检查环境
         await checkEnvironment();
-        // 3秒后关闭提示
         setTimeout(() => {
           setShowUpdateBanner(false);
           setUpdateResult(null);
@@ -117,7 +117,7 @@ function App() {
     } catch (e) {
       setUpdateResult({
         success: false,
-        message: '更新过程中发生错误',
+        message: t('app.updateError'),
         error: String(e),
       });
     } finally {
@@ -130,7 +130,6 @@ function App() {
     checkEnvironment();
   }, [checkEnvironment]);
 
-  // 启动后延迟检查更新（避免阻塞启动）
   useEffect(() => {
     if (!isTauri()) return;
     const timer = setTimeout(() => {
@@ -139,9 +138,7 @@ function App() {
     return () => clearTimeout(timer);
   }, [checkUpdate]);
 
-  // 定期获取服务状态
   useEffect(() => {
-    // 不在 Tauri 环境中则不轮询
     if (!isTauri()) return;
 
     const fetchServiceStatus = async () => {
@@ -159,10 +156,9 @@ function App() {
 
   const handleSetupComplete = useCallback(() => {
     appLogger.info('安装向导完成');
-    checkEnvironment(); // 重新检查环境
+    checkEnvironment();
   }, [checkEnvironment]);
 
-  // 页面切换处理
   const handleNavigate = (page: PageType) => {
     appLogger.action('页面切换', { from: currentPage, to: page });
     setCurrentPage(page);
@@ -204,7 +200,6 @@ function App() {
     );
   };
 
-  // 正在检查环境
   if (isReady === null) {
     return (
       <ThemeProvider>
@@ -221,7 +216,6 @@ function App() {
     );
   }
 
-  // 主界面
   return (
     <ThemeProvider>
       <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg-app)' }}>

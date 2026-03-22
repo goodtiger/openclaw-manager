@@ -1,4 +1,5 @@
 import { Play, Square, RotateCcw, Stethoscope } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 interface ServiceStatus {
@@ -22,6 +23,7 @@ export function QuickActions({
   onStop,
   onRestart,
 }: QuickActionsProps) {
+  const { t } = useTranslation();
   const isRunning = status?.running || false;
 
   return (
@@ -29,7 +31,6 @@ export function QuickActions({
       <h3 className="text-lg font-semibold text-content-primary mb-4">快捷操作</h3>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* 启动按钮 */}
         <button
           onClick={onStart}
           disabled={loading || isRunning}
@@ -58,11 +59,10 @@ export function QuickActions({
               isRunning ? 'text-content-tertiary' : 'text-content-secondary'
             )}
           >
-            启动
+            {t('quickActions.start')}
           </span>
         </button>
 
-        {/* 停止按钮 */}
         <button
           onClick={onStop}
           disabled={loading || !isRunning}
@@ -91,11 +91,10 @@ export function QuickActions({
               !isRunning ? 'text-content-tertiary' : 'text-content-secondary'
             )}
           >
-            停止
+            {t('quickActions.stop')}
           </span>
         </button>
 
-        {/* 重启按钮 */}
         <button
           onClick={onRestart}
           disabled={loading}
@@ -114,7 +113,6 @@ export function QuickActions({
           <span className="text-sm font-medium text-content-secondary">重启</span>
         </button>
 
-        {/* 诊断按钮 */}
         <button
           disabled={loading}
           className={clsx(

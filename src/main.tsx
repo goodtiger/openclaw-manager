@@ -4,6 +4,8 @@ import App from './App';
 import './styles/globals.css';
 // 确保 logger 初始化（会在控制台显示启动信息）
 import './lib/logger';
+// 初始化 i18n
+import './i18n';
 
 console.log(
   '%c🦞 虾池子  启动',
