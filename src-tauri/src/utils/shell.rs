@@ -34,13 +34,26 @@ pub fn get_extended_path() -> String {
                 paths.insert(0, format!("{}/.nvm/versions/node/v{}/bin", home_str, version));
             }
         }
-        // 也添加常见 nvm 版本路径
-        for version in ["v22.22.0", "v22.12.0", "v22.11.0", "v22.0.0", "v23.0.0"] {
-            let nvm_bin = format!("{}/.nvm/versions/node/{}/bin", home_str, version);
-            if std::path::Path::new(&nvm_bin).exists() {
-                paths.insert(0, nvm_bin);
-                break; // 只添加第一个存在的
+        // 动态扫描 nvm 已安装版本目录，避免 PATH 只覆盖写死版本
+        let nvm_versions_dir = std::path::Path::new(&home).join(".nvm/versions/node");
+        if let Ok(entries) = std::fs::read_dir(&nvm_versions_dir) {
+            let mut bins = Vec::new();
+            for entry in entries.flatten() {
+                let nvm_bin = entry.path().join("bin");
+                if nvm_bin.exists() {
+                    bins.push(nvm_bin.display().to_string());
+                }
             }
+            bins.sort();
+            bins.reverse();
+            for bin in bins {
+                paths.push(bin);
+            }
+        }
+
+        // 也添加常见 nvm 版本路径作为兜底
+        for version in ["v22.22.0", "v22.12.0", "v22.11.0", "v22.0.0", "v23.0.0"] {
+            paths.push(format!("{}/.nvm/versions/node/{}/bin", home_str, version));
         }
         
         // fnm
@@ -291,19 +304,37 @@ fn get_unix_openclaw_paths() -> Vec<String> {
         // npm 全局安装到用户目录
         paths.push(format!("{}/.npm-global/bin/openclaw", home_str));
         
-        // nvm 安装的 npm 全局包（需要找到正确的 node 版本目录）
-        // 先检查常见版本
-        for version in ["v22.0.0", "v22.1.0", "v22.2.0", "v22.11.0", "v22.12.0", "v23.0.0"] {
-            paths.push(format!("{}/.nvm/versions/node/{}/bin/openclaw", home_str, version));
-        }
-        
-        // 检查 nvm current（尝试读取 .nvmrc 或 default）
+        // nvm 安装的 npm 全局包：优先 default alias，再动态扫描已安装版本
         let nvm_default = format!("{}/.nvm/alias/default", home_str);
         if let Ok(version) = std::fs::read_to_string(&nvm_default) {
             let version = version.trim();
             if !version.is_empty() {
-                paths.insert(0, format!("{}/.nvm/versions/node/v{}/bin/openclaw", home_str, version));
+                let normalized = if version.starts_with('v') {
+                    version.to_string()
+                } else {
+                    format!("v{}", version)
+                };
+                paths.push(format!("{}/.nvm/versions/node/{}/bin/openclaw", home_str, normalized));
             }
+        }
+
+        let nvm_versions_dir = std::path::Path::new(&home).join(".nvm/versions/node");
+        if let Ok(entries) = std::fs::read_dir(&nvm_versions_dir) {
+            let mut version_paths = Vec::new();
+            for entry in entries.flatten() {
+                let openclaw_path = entry.path().join("bin/openclaw");
+                if openclaw_path.exists() {
+                    version_paths.push(openclaw_path.display().to_string());
+                }
+            }
+            version_paths.sort();
+            version_paths.reverse();
+            paths.extend(version_paths);
+        }
+
+        // 常见回退版本
+        for version in ["v22.22.0", "v22.12.0", "v22.11.0", "v22.0.0", "v23.0.0"] {
+            paths.push(format!("{}/.nvm/versions/node/{}/bin/openclaw", home_str, version));
         }
         
         // fnm
