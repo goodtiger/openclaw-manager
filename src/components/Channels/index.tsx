@@ -57,17 +57,16 @@ interface ChannelField {
   required?: boolean;
 }
 
-const channelInfo: Record<
-  string,
-  {
-    name: string;
-    icon: React.ReactNode;
-    color: string;
-    fields: ChannelField[];
-    helpText?: string;
-    docUrl?: string;
-  }
-> = {
+interface ChannelInfoDefinition {
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+  fields: ChannelField[];
+  helpText?: string;
+  docUrl?: string;
+}
+
+export const builtinChannelInfo: Record<string, ChannelInfoDefinition> = {
   telegram: {
     name: 'Telegram',
     icon: <MessageCircle size={20} />,
@@ -243,16 +242,7 @@ interface TestResult {
 export function Channels() {
   const { t } = useTranslation();
 
-  const channelInfo: Record<
-    string,
-    {
-      name: string;
-      icon: React.ReactNode;
-      color: string;
-      fields: ChannelField[];
-      helpText?: string;
-    }
-  > = {
+  const channelInfo: Record<string, ChannelInfoDefinition> = {
     telegram: {
       name: 'Telegram',
       icon: <MessageCircle size={20} />,
@@ -272,6 +262,7 @@ export function Channels() {
         ]},
       ],
       helpText: t('channels.telegram.helpText'),
+      docUrl: 'https://core.telegram.org/bots/tutorial',
     },
     discord: {
       name: 'Discord',
@@ -287,6 +278,7 @@ export function Channels() {
         ]},
       ],
       helpText: t('channels.discord.helpText'),
+      docUrl: 'https://discord.com/developers/docs/intro',
     },
     slack: {
       name: 'Slack',
@@ -298,6 +290,7 @@ export function Channels() {
         { key: 'testChannelId', label: t('channels.slack.testChannelId'), type: 'text', placeholder: t('channels.slack.testChannelIdPlaceholder') },
       ],
       helpText: t('channels.slack.helpText'),
+      docUrl: 'https://api.slack.com/start',
     },
     feishu: {
       name: t('channels.feishu.name'),
@@ -321,6 +314,7 @@ export function Channels() {
         ]},
       ],
       helpText: t('channels.feishu.helpText'),
+      docUrl: 'https://open.feishu.cn/document/home/index',
     },
     imessage: {
       name: 'iMessage',
@@ -339,6 +333,7 @@ export function Channels() {
         ]},
       ],
       helpText: t('channels.imessage.helpText'),
+      docUrl: 'https://support.apple.com/guide/messages/welcome/mac',
     },
     whatsapp: {
       name: 'WhatsApp',
@@ -357,6 +352,7 @@ export function Channels() {
         ]},
       ],
       helpText: t('channels.whatsapp.helpText'),
+      docUrl: 'https://business.whatsapp.com/developers',
     },
     wechat: {
       name: t('channels.wechat.name'),
@@ -367,6 +363,7 @@ export function Channels() {
         { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: t('channels.wechat.appSecretPlaceholder') },
       ],
       helpText: t('channels.wechat.helpText'),
+      docUrl: 'https://developers.weixin.qq.com/doc/',
     },
     dingtalk: {
       name: t('channels.dingtalk.name'),
@@ -377,6 +374,18 @@ export function Channels() {
         { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: t('channels.dingtalk.appSecretPlaceholder') },
       ],
       helpText: t('channels.dingtalk.helpText'),
+      docUrl: 'https://open.dingtalk.com/document/',
+    },
+    qqbot: {
+      name: 'QQ',
+      icon: <MessageSquare size={20} />,
+      color: 'text-sky-400',
+      fields: [
+        { key: 'appId', label: 'AppID', type: 'text', placeholder: 'QQ 机器人 AppID', required: true },
+        { key: 'appSecret', label: 'AppSecret', type: 'password', placeholder: 'QQ 机器人 AppSecret', required: true },
+      ],
+      helpText: '从 QQ 开放平台 (q.qq.com) 获取 AppID 和 AppSecret',
+      docUrl: 'https://q.qq.com/wiki/',
     },
   };
 

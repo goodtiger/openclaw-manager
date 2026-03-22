@@ -24,8 +24,9 @@ const pageTitles: Record<PageType, { title: string; description: string }> = {
 
 export function Header({ currentPage }: HeaderProps) {
   const { t } = useTranslation();
-  const title = t(`header.${currentPage}.title`);
-  const description = t(`header.${currentPage}.description`);
+  const fallback = pageTitles[currentPage];
+  const title = t(`header.${currentPage}.title`, { defaultValue: fallback.title });
+  const description = t(`header.${currentPage}.description`, { defaultValue: fallback.description });
   const [opening, setOpening] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
