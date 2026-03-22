@@ -24,7 +24,7 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
   const [logs, setLogs] = useState<string[]>([]);
   const [logsExpanded, setLogsExpanded] = useState(true);
   const [autoRefreshLogs, setAutoRefreshLogs] = useState(true);
-  const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchStatus = async () => {
     if (!isTauri()) {
@@ -65,9 +65,10 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
     };
   }, [autoRefreshLogs]);
 
+  // 自动滚动到日志底部（仅在日志容器内部滚动，不影响页面）
   useEffect(() => {
-    if (logsExpanded && logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (logsExpanded && logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
   }, [logs, logsExpanded]);
 
@@ -220,7 +221,7 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
             </div>
 
             {logsExpanded && (
-              <div className="h-64 overflow-y-auto p-4 font-mono text-xs leading-relaxed bg-dark-800">
+              <div ref={logsContainerRef} className="h-64 overflow-y-auto p-4 font-mono text-xs leading-relaxed bg-dark-800">
                 {logs.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-gray-500">
                     <p>{t('dashboard.noLogs')}</p>
@@ -235,7 +236,7 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
                         {line}
                       </div>
                     ))}
-                    <div ref={logsEndRef} />
+
                   </>
                 )}
               </div>

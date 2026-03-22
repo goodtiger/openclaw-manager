@@ -195,9 +195,10 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${
                   envStatus.node_installed && envStatus.node_version_ok
+                <div className={`p-2 rounded-lg ${envStatus.node_installed && envStatus.node_version_ok
                     ? 'bg-green-500/20 text-green-400'
                     : 'bg-red-500/20 text-red-400'
-                }`}>
+                  }`}>
                   <Cpu className="w-5 h-5" />
                 </div>
                 <div>
@@ -206,6 +207,8 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
                     {envStatus.node_version
                       ? `${envStatus.node_version} ${envStatus.node_version_ok ? '✓' : `(${t('setup.needsV22')})`}`
                       : t('setup.notInstalled')}
+                      ? `${envStatus.node_version} ${envStatus.node_version_ok ? '✓' : '(需要 v22+)'}`
+                      : '未安装'}
                   </p>
                 </div>
               </div>
@@ -238,9 +241,10 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${
                   envStatus.openclaw_installed
+                <div className={`p-2 rounded-lg ${envStatus.openclaw_installed
                     ? 'bg-green-500/20 text-green-400'
                     : 'bg-red-500/20 text-red-400'
-                }`}>
+                  }`}>
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
@@ -257,9 +261,8 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
                 <button
                   onClick={handleInstallOpenclaw}
                   disabled={installing !== null || !envStatus.node_version_ok}
-                  className={`btn-primary text-sm px-4 py-2 flex items-center gap-2 ${
-                    !envStatus.node_version_ok ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`btn-primary text-sm px-4 py-2 flex items-center gap-2 ${!envStatus.node_version_ok ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   title={!envStatus.node_version_ok ? '请先安装 Node.js' : ''}
                 >
                   {installing === 'openclaw' ? (
@@ -408,7 +411,7 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
 
         {/* 版本信息 */}
         <p className="text-center text-dark-500 text-xs mt-6">
-          OpenClaw Manager v0.0.5
+          OpenClaw Manager v0.0.7
         </p>
       </motion.div>
     </div>
