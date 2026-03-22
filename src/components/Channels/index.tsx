@@ -50,6 +50,143 @@ interface ChannelField {
   required?: boolean;
 }
 
+const channelInfo: Record<
+  string,
+  { 
+    name: string; 
+    icon: React.ReactNode; 
+    color: string;
+    fields: ChannelField[];
+    helpText?: string;
+  }
+> = {
+  telegram: {
+    name: 'Telegram',
+    icon: <MessageCircle size={20} />,
+    color: 'text-blue-400',
+    fields: [
+      { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: '从 @BotFather 获取', required: true },
+      { key: 'userId', label: 'User ID', type: 'text', placeholder: '你的 Telegram User ID', required: true },
+      { key: 'dmPolicy', label: '私聊策略', type: 'select', options: [
+        { value: 'pairing', label: '配对模式' },
+        { value: 'open', label: '开放模式' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+      { key: 'groupPolicy', label: '群组策略', type: 'select', options: [
+        { value: 'allowlist', label: '白名单' },
+        { value: 'open', label: '开放' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+    ],
+    helpText: '1. 搜索 @BotFather 发送 /newbot 获取 Token  2. 搜索 @userinfobot 获取 User ID',
+  },
+  discord: {
+    name: 'Discord',
+    icon: <Hash size={20} />,
+    color: 'text-indigo-400',
+    fields: [
+      { key: 'token', label: 'Bot Token', type: 'password', placeholder: 'Discord Bot Token', required: true },
+      { key: 'testChannelId', label: '测试 Channel ID', type: 'text', placeholder: '用于发送测试消息的频道 ID (可选)' },
+      { key: 'dmPolicy', label: '私聊策略', type: 'select', options: [
+        { value: 'pairing', label: '配对模式' },
+        { value: 'open', label: '开放模式' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+    ],
+    helpText: '从 Discord Developer Portal 获取，开启开发者模式可复制 Channel ID',
+  },
+  slack: {
+    name: 'Slack',
+    icon: <Slack size={20} />,
+    color: 'text-purple-400',
+    fields: [
+      { key: 'botToken', label: 'Bot Token', type: 'password', placeholder: 'xoxb-...', required: true },
+      { key: 'appToken', label: 'App Token', type: 'password', placeholder: 'xapp-...' },
+      { key: 'testChannelId', label: '测试 Channel ID', type: 'text', placeholder: '用于发送测试消息的频道 ID (可选)' },
+    ],
+    helpText: '从 Slack API 后台获取，Channel ID 可从频道详情复制',
+  },
+  feishu: {
+    name: '飞书',
+    icon: <MessagesSquare size={20} />,
+    color: 'text-blue-500',
+    fields: [
+      { key: 'appId', label: 'App ID', type: 'text', placeholder: '飞书应用 App ID', required: true },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: '飞书应用 App Secret', required: true },
+      { key: 'testChatId', label: '测试 Chat ID', type: 'text', placeholder: '用于发送测试消息的群聊/用户 ID (可选)' },
+      { key: 'connectionMode', label: '连接模式', type: 'select', options: [
+        { value: 'websocket', label: 'WebSocket (推荐)' },
+        { value: 'webhook', label: 'Webhook' },
+      ]},
+      { key: 'domain', label: '部署区域', type: 'select', options: [
+        { value: 'feishu', label: '国内 (feishu.cn)' },
+        { value: 'lark', label: '海外 (larksuite.com)' },
+      ]},
+      { key: 'requireMention', label: '需要 @提及', type: 'select', options: [
+        { value: 'true', label: '是' },
+        { value: 'false', label: '否' },
+      ]},
+    ],
+    helpText: '从飞书开放平台获取凭证，Chat ID 可从群聊设置中获取',
+  },
+  imessage: {
+    name: 'iMessage',
+    icon: <Apple size={20} />,
+    color: 'text-green-400',
+    fields: [
+      { key: 'dmPolicy', label: '私聊策略', type: 'select', options: [
+        { value: 'pairing', label: '配对模式' },
+        { value: 'open', label: '开放模式' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+      { key: 'groupPolicy', label: '群组策略', type: 'select', options: [
+        { value: 'allowlist', label: '白名单' },
+        { value: 'open', label: '开放' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+    ],
+    helpText: '仅支持 macOS，需要授权消息访问权限',
+  },
+  whatsapp: {
+    name: 'WhatsApp',
+    icon: <MessageCircle size={20} />,
+    color: 'text-green-500',
+    fields: [
+      { key: 'dmPolicy', label: '私聊策略', type: 'select', options: [
+        { value: 'pairing', label: '配对模式' },
+        { value: 'open', label: '开放模式' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+      { key: 'groupPolicy', label: '群组策略', type: 'select', options: [
+        { value: 'allowlist', label: '白名单' },
+        { value: 'open', label: '开放' },
+        { value: 'disabled', label: '禁用' },
+      ]},
+    ],
+    helpText: '需要扫描二维码登录，运行: openclaw channels login --channel whatsapp',
+  },
+  wechat: {
+    name: '微信',
+    icon: <MessageSquare size={20} />,
+    color: 'text-green-600',
+    fields: [
+      { key: 'appId', label: 'App ID', type: 'text', placeholder: '微信开放平台 App ID' },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: '微信开放平台 App Secret' },
+    ],
+    helpText: '微信公众号/企业微信配置',
+  },
+  dingtalk: {
+    name: '钉钉',
+    icon: <Bell size={20} />,
+    color: 'text-blue-600',
+    fields: [
+      { key: 'appKey', label: 'App Key', type: 'text', placeholder: '钉钉应用 App Key' },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: '钉钉应用 App Secret' },
+    ],
+    helpText: '从钉钉开放平台获取',
+  },
+};
+
 interface TestResult {
   success: boolean;
   message: string;
