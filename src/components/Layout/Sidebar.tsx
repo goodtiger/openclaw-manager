@@ -10,6 +10,7 @@ import {
   Settings,
   ShieldAlert,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { PageType } from '../../App';
 import clsx from 'clsx';
 
@@ -38,7 +39,9 @@ const menuItems: { id: PageType; label: string; icon: React.ElementType }[] = [
 ];
 
 export function Sidebar({ currentPage, onNavigate, serviceStatus }: SidebarProps) {
+  const { t } = useTranslation();
   const isRunning = serviceStatus?.running ?? false;
+
   return (
     <aside
       className="w-64 flex flex-col"
@@ -59,7 +62,6 @@ export function Sidebar({ currentPage, onNavigate, serviceStatus }: SidebarProps
         </div>
       </div>
 
-      {/* 导航菜单 */}
       <nav className="flex-1 py-4 px-3">
         <ul className="space-y-1">
           {menuItems.map((item) => {
@@ -67,9 +69,9 @@ export function Sidebar({ currentPage, onNavigate, serviceStatus }: SidebarProps
             const Icon = item.icon;
 
             return (
-              <li key={item.id}>
+              <li key={id}>
                 <button
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => onNavigate(id)}
                   className={clsx(
                     'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all relative'
                   )}
@@ -98,7 +100,7 @@ export function Sidebar({ currentPage, onNavigate, serviceStatus }: SidebarProps
                     />
                   )}
                   <Icon size={18} className={isActive ? 'text-claw-400' : ''} />
-                  <span>{item.label}</span>
+                  <span>{label}</span>
                 </button>
               </li>
             );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PageType } from '../../App';
 import { RefreshCw, ExternalLink, Loader2, Sun, Moon } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-shell';
@@ -22,7 +23,9 @@ const pageTitles: Record<PageType, { title: string; description: string }> = {
 };
 
 export function Header({ currentPage }: HeaderProps) {
-  const { title, description } = pageTitles[currentPage];
+  const { t } = useTranslation();
+  const title = t(`header.${currentPage}.title`);
+  const description = t(`header.${currentPage}.description`);
   const [opening, setOpening] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
@@ -53,7 +56,6 @@ export function Header({ currentPage }: HeaderProps) {
         <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{description}</p>
       </div>
 
-      {/* 右侧：操作按钮 */}
       <div className="flex items-center gap-2 titlebar-no-drag">
         {/* 主题切换 */}
         <button

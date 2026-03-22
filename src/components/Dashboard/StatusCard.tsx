@@ -1,4 +1,5 @@
 import { Activity, Cpu, HardDrive, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 interface ServiceStatus {
@@ -16,6 +17,8 @@ interface StatusCardProps {
 }
 
 export function StatusCard({ status, loading }: StatusCardProps) {
+  const { t } = useTranslation();
+
   const formatUptime = (seconds: number | null) => {
     if (!seconds) return '--';
     const hours = Math.floor(seconds / 3600);
@@ -45,7 +48,7 @@ export function StatusCard({ status, loading }: StatusCardProps) {
                 : 'text-red-400'
             )}
           >
-            {loading ? '检测中...' : status?.running ? '运行中' : '已停止'}
+            {loading ? t('statusCard.checking') : status?.running ? t('statusCard.running') : t('statusCard.stopped')}
           </span>
         </div>
       </div>

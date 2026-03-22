@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Monitor, Package, Folder, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api, SystemInfo as SystemInfoType, isTauri } from '../../lib/tauri';
 
 export function SystemInfo() {
+  const { t } = useTranslation();
   const [info, setInfo] = useState<SystemInfoType | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,6 @@ export function SystemInfo() {
       <h3 className="text-lg font-semibold text-content-primary mb-4">系统信息</h3>
 
       <div className="space-y-4">
-        {/* 操作系统 */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-surface-elevated flex items-center justify-center">
             <Monitor size={16} className="text-content-secondary" />
@@ -69,7 +70,6 @@ export function SystemInfo() {
           </div>
         </div>
 
-        {/* OpenClaw */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-surface-elevated flex items-center justify-center">
             {info?.openclaw_installed ? (
@@ -82,13 +82,12 @@ export function SystemInfo() {
             <p className="text-xs text-content-tertiary">OpenClaw</p>
             <p className="text-sm text-content-primary">
               {info?.openclaw_installed
-                ? info.openclaw_version || '已安装'
-                : '未安装'}
+                ? info.openclaw_version || t('systemInfo.installed')
+                : t('systemInfo.notInstalled')}
             </p>
           </div>
         </div>
 
-        {/* Node.js */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-surface-elevated flex items-center justify-center">
             <Package size={16} className="text-green-500" />
@@ -99,7 +98,6 @@ export function SystemInfo() {
           </div>
         </div>
 
-        {/* 配置目录 */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-surface-elevated flex items-center justify-center">
             <Folder size={16} className="text-amber-400" />
