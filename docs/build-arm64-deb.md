@@ -53,8 +53,8 @@ docker rm openclaw-extract
 ### 手动触发发布
 
 ```bash
-git tag v0.0.7
-git push origin v0.0.7
+git tag v0.0.11
+git push origin v0.0.11
 ```
 
 推送 tag 后，CI 会自动构建所有平台的安装包并创建 Draft Release。
