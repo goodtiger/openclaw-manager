@@ -25,13 +25,22 @@ pub fn get_extended_path() -> String {
     
     if let Some(home) = dirs::home_dir() {
         let home_str = home.display().to_string();
+
+        // 用户级可执行目录
+        paths.push(format!("{}/bin", home_str));
+        paths.push(format!("{}/.bun/bin", home_str));
         
         // nvm 路径（尝试获取当前版本）
         let nvm_default = format!("{}/.nvm/alias/default", home_str);
         if let Ok(version) = std::fs::read_to_string(&nvm_default) {
             let version = version.trim();
             if !version.is_empty() {
-                paths.insert(0, format!("{}/.nvm/versions/node/v{}/bin", home_str, version));
+                let normalized = if version.starts_with('v') {
+                    version.to_string()
+                } else {
+                    format!("v{}", version)
+                };
+                paths.insert(0, format!("{}/.nvm/versions/node/{}/bin", home_str, normalized));
             }
         }
         // 动态扫描 nvm 已安装版本目录，避免 PATH 只覆盖写死版本
@@ -300,6 +309,10 @@ fn get_unix_openclaw_paths() -> Vec<String> {
     
     if let Some(home) = dirs::home_dir() {
         let home_str = home.display().to_string();
+
+        // 用户级可执行目录
+        paths.push(format!("{}/bin/openclaw", home_str));
+        paths.push(format!("{}/.bun/bin/openclaw", home_str));
         
         // npm 全局安装到用户目录
         paths.push(format!("{}/.npm-global/bin/openclaw", home_str));
