@@ -68,7 +68,10 @@
     "dialogAutoClose": "对话框将自动关闭...",
     "saveSettings": "保存设置",
     "settingsSaved": "设置已保存！",
-    "uninstallError": "卸载过程中发生错误"
+    "uninstallError": "卸载过程中发生错误",
+    "installOpenclaw": "安装 OpenClaw",
+    "installOpenclawDesc": "通过 npm 全局安装 OpenClaw CLI 工具",
+    "installError": "安装过程中发生错误"
   },
   "dashboard": {
     "liveLogs": "实时日志",
@@ -341,6 +344,8 @@
     "checkFailed": "检查环境失败: {{error}}",
     "installComplete": "安装完成，请重启应用以使环境变量生效",
     "terminalOpened": "已打开安装终端，请在终端中完成安装后点击\"重新检查\"",
-    "installFailed": "安装失败: {{error}}"
+    "installFailed": "安装失败: {{error}}",
+    "mirrorSource": "镜像源",
+    "useMirror": "使用镜像源"
   }
 }

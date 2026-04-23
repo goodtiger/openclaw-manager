@@ -12,7 +12,9 @@ import {
   AlertTriangle,
   X,
   Globe,
+  Download,
 } from 'lucide-react';
+import { MirrorSelector, getMirrorUrl } from '../MirrorSelector';
 
 interface InstallResult {
   success: boolean;
@@ -40,6 +42,9 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
   const [showUninstallConfirm, setShowUninstallConfirm] = useState(false);
   const [uninstalling, setUninstalling] = useState(false);
   const [uninstallResult, setUninstallResult] = useState<InstallResult | null>(null);
+  const [installing, setInstalling] = useState(false);
+  const [installResult, setInstallResult] = useState<InstallResult | null>(null);
+  const [mirrorId, setMirrorId] = useState<string>('npmmirror');
 
   const handleSave = async () => {
     setSaving(true);
@@ -87,6 +92,29 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
       });
     } finally {
       setUninstalling(false);
+    }
+  };
+
+  const handleInstallOpenclaw = async () => {
+    setInstalling(true);
+    setInstallResult(null);
+    try {
+      const registry = getMirrorUrl(mirrorId);
+      const result = await invoke<InstallResult>('install_openclaw', { registry });
+      setInstallResult(result);
+      if (result.success) {
+        await invoke<InstallResult>('init_openclaw_config');
+        onEnvironmentChange?.();
+        setTimeout(() => setInstallResult(null), 3000);
+      }
+    } catch (e) {
+      setInstallResult({
+        success: false,
+        message: t('settings.installError'),
+        error: String(e),
+      });
+    } finally {
+      setInstalling(false);
     }
   };
 
@@ -256,11 +284,50 @@ export function Settings({ onEnvironmentChange }: SettingsProps) {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-content-primary">危险操作</h3>
-              <p className="text-xs text-content-tertiary">以下操作不可撤销，请谨慎操作</p>
+              <p className="text-xs text-content-tertiary">安装与卸载 OpenClaw</p>
             </div>
           </div>
 
           <div className="space-y-3">
+            {/* 安装 OpenClaw */}
+            <div className="p-4 bg-green-950/30 rounded-lg border border-green-900/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {installing ? (
+                    <Loader2 size={18} className="text-green-400 animate-spin" />
+                  ) : (
+                    <Download size={18} className="text-green-400" />
+                  )}
+                  <div>
+                    <p className="text-sm text-green-300">{t('settings.installOpenclaw')}</p>
+                    <p className="text-xs text-green-400/70">{t('settings.installOpenclawDesc')}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleInstallOpenclaw}
+                  disabled={installing}
+                  className="px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {installing ? t('setup.installing') : t('setup.install')}
+                </button>
+              </div>
+              <MirrorSelector value={mirrorId} onChange={setMirrorId} compact />
+            </div>
+
+            {installResult && (
+              <div className={`p-4 rounded-lg ${installResult.success ? 'bg-green-900/30 border border-green-800' : 'bg-red-900/30 border border-red-800'}`}>
+                <p className={`text-sm ${installResult.success ? 'text-green-300' : 'text-red-300'}`}>
+                  {installResult.message}
+                </p>
+                {installResult.error && (
+                  <p className="text-xs text-red-400 mt-2 font-mono">
+                    {installResult.error}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* 卸载 OpenClaw */}
             <button
               onClick={() => setShowUninstallConfirm(true)}
               className="w-full flex items-center gap-3 p-4 bg-red-950/30 rounded-lg hover:bg-red-900/40 transition-colors text-left border border-red-900/30"

@@ -68,7 +68,10 @@
     "dialogAutoClose": "Dialog will close automatically...",
     "saveSettings": "Save Settings",
     "settingsSaved": "Settings saved!",
-    "uninstallError": "An error occurred during uninstall"
+    "uninstallError": "An error occurred during uninstall",
+    "installOpenclaw": "Install OpenClaw",
+    "installOpenclawDesc": "Install OpenClaw CLI globally via npm",
+    "installError": "An error occurred during install"
   },
   "dashboard": {
     "liveLogs": "Live Logs",
@@ -341,6 +344,8 @@
     "checkFailed": "Environment check failed: {{error}}",
     "installComplete": "Installation complete. Please restart the app for environment variables to take effect.",
     "terminalOpened": "Installation terminal opened. Please complete the installation and click \"Recheck\".",
-    "installFailed": "Installation failed: {{error}}"
+    "installFailed": "Installation failed: {{error}}",
+    "mirrorSource": "Mirror",
+    "useMirror": "Use mirror"
   }
 }

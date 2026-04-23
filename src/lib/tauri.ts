@@ -159,6 +159,12 @@ export const api = {
   checkOpenclawInstalled: () => invokeWithLog<boolean>('check_openclaw_installed'),
   getOpenclawVersion: () => invokeWithLog<string | null>('get_openclaw_version'),
 
+  // 安装器
+  installOpenclaw: (registry?: string) =>
+    invokeWithLog<string>('install_openclaw', { registry: registry || null }),
+  updateOpenclaw: (registry?: string) =>
+    invokeWithLog<string>('update_openclaw', { registry: registry || null }),
+
   // 配置管理
   getConfig: () => invokeWithLog<unknown>('get_config'),
   saveConfig: (config: unknown) => invokeWithLog<string>('save_config', { config }),

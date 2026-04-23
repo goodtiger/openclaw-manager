@@ -13,6 +13,7 @@ import {
   Package
 } from 'lucide-react';
 import { setupLogger } from '../../lib/logger';
+import { MirrorSelector, getMirrorUrl } from '../MirrorSelector';
 
 interface EnvironmentStatus {
   node_installed: boolean;
@@ -44,6 +45,7 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
   const [installing, setInstalling] = useState<'nodejs' | 'openclaw' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<'check' | 'install' | 'complete'>('check');
+  const [mirrorId, setMirrorId] = useState<string>('npmmirror');
 
   const checkEnvironment = async () => {
     setupLogger.info('检查系统环境...');
@@ -117,8 +119,11 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
     setInstalling('openclaw');
     setError(null);
 
+    const registry = getMirrorUrl(mirrorId);
+    setupLogger.info(`使用 registry: ${registry ?? '官方默认'}`);
+
     try {
-      const result = await invoke<InstallResult>('install_openclaw');
+      const result = await invoke<InstallResult>('install_openclaw', { registry });
 
       if (result.success) {
         setupLogger.info('✅ OpenClaw 安装成功，初始化配置...');
@@ -254,27 +259,38 @@ export function Setup({ onComplete, embedded = false }: SetupProps) {
               {envStatus.openclaw_installed ? (
                 <CheckCircle2 className="w-6 h-6 text-green-400" />
               ) : (
-                <button
-                  onClick={handleInstallOpenclaw}
-                  disabled={installing !== null || !envStatus.node_version_ok}
-                  className={`btn-primary text-sm px-4 py-2 flex items-center gap-2 ${!envStatus.node_version_ok ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  title={!envStatus.node_version_ok ? '请先安装 Node.js' : ''}
-                >
-                  {installing === 'openclaw' ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {t('setup.installing')}
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4" />
-                      {t('setup.install')}
-                    </>
+                <div className="flex flex-col items-end gap-1">
+                  {!envStatus.node_version_ok && (
+                    <span className="text-xs text-yellow-400">请先安装 Node.js</span>
                   )}
-                </button>
+                  <button
+                    onClick={handleInstallOpenclaw}
+                    disabled={installing !== null || !envStatus.node_version_ok}
+                    className={`btn-primary text-sm px-4 py-2 flex items-center gap-2 ${!envStatus.node_version_ok ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                  >
+                    {installing === 'openclaw' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {t('setup.installing')}
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        {t('setup.install')}
+                      </>
+                    )}
+                  </button>
+                </div>
               )}
             </div>
+
+            {/* 镜像源选择（未安装时显示） */}
+            {!envStatus.openclaw_installed && (
+              <div className="flex items-center justify-between px-1">
+                <MirrorSelector value={mirrorId} onChange={setMirrorId} />
+              </div>
+            )}
 
             {/* 错误信息 */}
             {error && (

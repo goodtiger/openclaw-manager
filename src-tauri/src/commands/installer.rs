@@ -389,7 +389,7 @@ if ($nodeVersion) {
 }
 "#;
     
-    match shell::run_powershell_output(script) {
+    match shell::run_powershell_output(&script) {
         Ok(output) => {
             // 验证安装
             if get_node_version().is_some() {
@@ -439,7 +439,7 @@ brew link --overwrite node@22
 node --version
 "#;
     
-    match shell::run_bash_output(script) {
+    match shell::run_bash_output(&script) {
         Ok(output) => Ok(InstallResult {
             success: true,
             message: format!("Node.js 安装成功！{}", output),
@@ -482,7 +482,7 @@ fi
 node --version
 "#;
     
-    match shell::run_bash_output(script) {
+    match shell::run_bash_output(&script) {
         Ok(output) => Ok(InstallResult {
             success: true,
             message: format!("Node.js 安装成功！{}", output),
@@ -498,58 +498,65 @@ node --version
 
 /// 安装 OpenClaw
 #[command]
-pub async fn install_openclaw() -> Result<InstallResult, String> {
+pub async fn install_openclaw(registry: Option<String>) -> Result<InstallResult, String> {
     info!("[安装OpenClaw] 开始安装 OpenClaw...");
+    info!("[安装OpenClaw] npm registry: {:?}", registry);
     let os = platform::get_os();
     info!("[安装OpenClaw] 检测到操作系统: {}", os);
-    
+
     let result = match os.as_str() {
         "windows" => {
             info!("[安装OpenClaw] 使用 Windows 安装方式...");
-            install_openclaw_windows().await
+            install_openclaw_windows(registry.as_deref()).await
         },
         _ => {
             info!("[安装OpenClaw] 使用 Unix 安装方式 (npm)...");
-            install_openclaw_unix().await
+            install_openclaw_unix(registry.as_deref()).await
         },
     };
-    
+
     match &result {
         Ok(r) if r.success => info!("[安装OpenClaw] ✓ 安装成功"),
         Ok(r) => warn!("[安装OpenClaw] ✗ 安装失败: {}", r.message),
         Err(e) => error!("[安装OpenClaw] ✗ 安装错误: {}", e),
     }
-    
+
     result
 }
 
 /// Windows 安装 OpenClaw
-async fn install_openclaw_windows() -> Result<InstallResult, String> {
-    let script = r#"
+async fn install_openclaw_windows(registry: Option<&str>) -> Result<InstallResult, String> {
+    let registry_flag = match registry {
+        Some(url) => format!(" --registry={}", url),
+        None => String::new(),
+    };
+    let script = format!(
+        r#"
 $ErrorActionPreference = 'Stop'
 
 # 检查 Node.js
 $nodeVersion = node --version 2>$null
-if (-not $nodeVersion) {
+if (-not $nodeVersion) {{
     Write-Host "错误：请先安装 Node.js"
     exit 1
-}
+}}
 
 Write-Host "使用 npm 安装 OpenClaw..."
-npm install -g openclaw@latest --unsafe-perm
+npm install -g openclaw@latest --unsafe-perm{registry_flag}
 
 # 验证安装
 $openclawVersion = openclaw --version 2>$null
-if ($openclawVersion) {
+if ($openclawVersion) {{
     Write-Host "OpenClaw 安装成功: $openclawVersion"
     exit 0
-} else {
+}} else {{
     Write-Host "OpenClaw 安装失败"
     exit 1
-}
-"#;
+}}
+"#,
+    );
     
-    match shell::run_powershell_output(script) {
+    match shell::run_powershell_output(&script) {
         Ok(output) => {
             if get_openclaw_version().is_some() {
                 Ok(InstallResult {
@@ -574,8 +581,13 @@ if ($openclawVersion) {
 }
 
 /// Unix 系统安装 OpenClaw
-async fn install_openclaw_unix() -> Result<InstallResult, String> {
-    let script = r#"
+async fn install_openclaw_unix(registry: Option<&str>) -> Result<InstallResult, String> {
+    let registry_flag = match registry {
+        Some(url) => format!(" --registry={}", url),
+        None => String::new(),
+    };
+    let script = format!(
+        r#"
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
     echo "错误：请先安装 Node.js"
@@ -583,13 +595,14 @@ if ! command -v node &> /dev/null; then
 fi
 
 echo "使用 npm 安装 OpenClaw..."
-npm install -g openclaw@latest --unsafe-perm
+npm install -g openclaw@latest --unsafe-perm{registry_flag}
 
 # 验证安装
 openclaw --version
-"#;
+"#,
+    );
     
-    match shell::run_bash_output(script) {
+    match shell::run_bash_output(&script) {
         Ok(output) => Ok(InstallResult {
             success: true,
             message: format!("OpenClaw 安装成功！{}", output),
@@ -975,7 +988,7 @@ else
 fi
 "#;
     
-    match shell::run_bash_output(script) {
+    match shell::run_bash_output(&script) {
         Ok(output) => Ok(InstallResult {
             success: true,
             message: format!("OpenClaw 已成功卸载！{}", output),
@@ -1108,46 +1121,52 @@ fn compare_versions(current: &str, latest: &str) -> bool {
 
 /// 更新 OpenClaw
 #[command]
-pub async fn update_openclaw() -> Result<InstallResult, String> {
+pub async fn update_openclaw(registry: Option<String>) -> Result<InstallResult, String> {
     info!("[更新OpenClaw] 开始更新 OpenClaw...");
+    info!("[更新OpenClaw] npm registry: {:?}", registry);
     let os = platform::get_os();
-    
+
     // 先停止服务
     info!("[更新OpenClaw] 尝试停止服务...");
     let _ = shell::run_openclaw(&["gateway", "stop"]);
     std::thread::sleep(std::time::Duration::from_millis(500));
-    
+
     let result = match os.as_str() {
         "windows" => {
             info!("[更新OpenClaw] 使用 Windows 更新方式...");
-            update_openclaw_windows().await
+            update_openclaw_windows(registry.as_deref()).await
         },
         _ => {
             info!("[更新OpenClaw] 使用 Unix 更新方式 (npm)...");
-            update_openclaw_unix().await
+            update_openclaw_unix(registry.as_deref()).await
         },
     };
-    
+
     match &result {
         Ok(r) if r.success => info!("[更新OpenClaw] ✓ 更新成功"),
         Ok(r) => warn!("[更新OpenClaw] ✗ 更新失败: {}", r.message),
         Err(e) => error!("[更新OpenClaw] ✗ 更新错误: {}", e),
     }
-    
+
     result
 }
 
 /// Windows 更新 OpenClaw
-async fn update_openclaw_windows() -> Result<InstallResult, String> {
-    info!("[更新OpenClaw] 执行 npm install -g openclaw@latest...");
-    
-    match shell::run_cmd_output("npm install -g openclaw@latest") {
+async fn update_openclaw_windows(registry: Option<&str>) -> Result<InstallResult, String> {
+    let registry_flag = match registry {
+        Some(url) => format!(" --registry={}", url),
+        None => String::new(),
+    };
+    let cmd = format!("npm install -g openclaw@latest{}", registry_flag);
+    info!("[更新OpenClaw] 执行 {}...", cmd);
+
+    match shell::run_cmd_output(&cmd) {
         Ok(output) => {
             info!("[更新OpenClaw] npm 输出: {}", output);
-            
+
             // 获取新版本
             let new_version = get_openclaw_version();
-            
+
             Ok(InstallResult {
                 success: true,
                 message: format!("OpenClaw 已更新到 {}", new_version.unwrap_or("最新版本".to_string())),
@@ -1166,16 +1185,22 @@ async fn update_openclaw_windows() -> Result<InstallResult, String> {
 }
 
 /// Unix 系统更新 OpenClaw
-async fn update_openclaw_unix() -> Result<InstallResult, String> {
-    let script = r#"
+async fn update_openclaw_unix(registry: Option<&str>) -> Result<InstallResult, String> {
+    let registry_flag = match registry {
+        Some(url) => format!(" --registry={}", url),
+        None => String::new(),
+    };
+    let script = format!(
+        r#"
 echo "更新 OpenClaw..."
-npm install -g openclaw@latest
+npm install -g openclaw@latest{registry_flag}
 
 # 验证更新
 openclaw --version
-"#;
+"#,
+    );
     
-    match shell::run_bash_output(script) {
+    match shell::run_bash_output(&script) {
         Ok(output) => Ok(InstallResult {
             success: true,
             message: format!("OpenClaw 已更新！{}", output),

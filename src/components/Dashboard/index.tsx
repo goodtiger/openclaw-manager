@@ -80,7 +80,12 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
       await fetchStatus();
       await fetchLogs();
     } catch (e) {
-      console.error('启动失败:', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes('找不到') || msg.includes('openclaw')) {
+        setLogs(prev => [`[错误] ${msg}`, ...prev]);
+      } else {
+        console.error('启动失败:', e);
+      }
     } finally {
       setActionLoading(false);
     }
@@ -94,7 +99,8 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
       await fetchStatus();
       await fetchLogs();
     } catch (e) {
-      console.error('停止失败:', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      setLogs(prev => [`[错误] ${msg}`, ...prev]);
     } finally {
       setActionLoading(false);
     }
@@ -108,7 +114,8 @@ export function Dashboard({ envStatus, onSetupComplete }: DashboardProps) {
       await fetchStatus();
       await fetchLogs();
     } catch (e) {
-      console.error('重启失败:', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      setLogs(prev => [`[错误] ${msg}`, ...prev]);
     } finally {
       setActionLoading(false);
     }
